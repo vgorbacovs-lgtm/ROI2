@@ -619,24 +619,24 @@ function selectTariff(id){
 }
 
 function autoSelectTariff(){
-  if(tariffMode==='manual') return;
   var cars=+document.getElementById('cars').value;
   var stops=+document.getElementById('stops').value;
-  var byCars=null, byStops=null;
+  if(tariffMode!=='auto' && tariffMode!=='manual'){
+    var p=PLANS.find(function(x){return x.id===tariffMode;});
+    if(p && cars>=p.carsMin && cars<=p.carsMax) return;
+  }
+  if(tariffMode==='manual') return;
+  var match=null;
   for(var i=0;i<PLANS.length;i++){
-    if(cars>=PLANS[i].carsMin && cars<=PLANS[i].carsMax){byCars=PLANS[i];break;}
+    if(cars>=PLANS[i].carsMin && cars<=PLANS[i].carsMax){match=PLANS[i];break;}
   }
-  for(var j=0;j<PLANS.length;j++){
-    if(stops<=PLANS[j].stopsMax){byStops=PLANS[j];break;}
+  if(!match) match=PLANS[PLANS.length-1];
+  if(match){
+    tariffMode=match.id;
+    tariff={setup:match.setup,monthly:match.monthly};
+    highlightTariff();
+    document.getElementById('active-plan-name').textContent=match.name[LANG];
   }
-  if(!byCars) byCars=PLANS[PLANS.length-1];
-  if(!byStops) byStops=PLANS[PLANS.length-1];
-  var match=byCars.monthly>=byStops.monthly ? byCars : byStops;
-  tariffMode=match.id;
-  tariff={setup:match.setup,monthly:match.monthly};
-  highlightTariff();
-  document.getElementById('active-plan-name').textContent=match.name[LANG];
-}
 }
 
 function highlightTariff(){
